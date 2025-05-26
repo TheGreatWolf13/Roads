@@ -10,5 +10,8 @@
     <orderEntry type="library" name="intellij.annotations" level="project" />
     <orderEntry type="library" name="javax.annotation.api" level="project" />
     <orderEntry type="library" name="google.code.findbugs.annotations" level="project" />
+    <orderEntry type="library" name="lwjgl.osgi.assimp" level="project" />
+    <orderEntry type="library" name="lwjgl.osgi.glfw" level="project" />
+    <orderEntry type="library" name="lwjgl.osgi.opengl" level="project" />
   </component>
 </module>
