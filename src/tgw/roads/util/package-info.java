@@ -1,0 +1,4 @@
+@FieldsAreNotNullByDefault
+@MethodsReturnNotNullByDefault
+@ParametersAreNotNullByDefault
+package tgw.roads.util;
