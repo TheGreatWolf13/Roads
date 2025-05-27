@@ -19,7 +19,7 @@ public final class RoadsMain {
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
-        long window = GLFW.glfwCreateWindow(300, 300, "Hello World!", MemoryUtil.NULL, MemoryUtil.NULL);
+        long window = GLFW.glfwCreateWindow(640, 480, "Hello World!", MemoryUtil.NULL, MemoryUtil.NULL);
         if (window == MemoryUtil.NULL) {
             throw new IllegalStateException("Failed to create GLFW window!");
         }
@@ -30,7 +30,7 @@ public final class RoadsMain {
         });
         GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
         assert vidmode != null;
-        GLFW.glfwSetWindowPos(window, (vidmode.width() - 300) / 2, (vidmode.height() - 300) / 2);
+        GLFW.glfwSetWindowPos(window, (vidmode.width() - 640) / 2, (vidmode.height() - 480) / 2);
         GLFW.glfwMakeContextCurrent(window);
         GLFW.glfwSwapInterval(1);
         GLFW.glfwShowWindow(window);
@@ -52,6 +52,16 @@ public final class RoadsMain {
                 frames = 0;
             }
             GLFW.glfwSetWindowTitle(window, fps);
+            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glVertex2f(-0.5f, -0.5f);
+            GL11.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+            GL11.glVertex2f(-0.5f, 0.5f);
+            GL11.glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+            GL11.glVertex2f(1, 1);
+            GL11.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+            GL11.glVertex2f(1, -1);
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            GL11.glEnd();
             GLFW.glfwSwapBuffers(window);
             GLFW.glfwPollEvents();
         }
