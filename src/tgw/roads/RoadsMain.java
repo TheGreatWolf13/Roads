@@ -6,10 +6,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
-
-import java.nio.IntBuffer;
 
 public final class RoadsMain {
 
@@ -32,14 +29,9 @@ public final class RoadsMain {
                 GLFW.glfwSetWindowShouldClose(w, true);
             }
         });
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
-            GLFW.glfwGetWindowSize(window, pWidth, pHeight);
-            GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
-            assert vidmode != null;
-            GLFW.glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
-        }
+        GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+        assert vidmode != null;
+        GLFW.glfwSetWindowPos(window, (vidmode.width() - 300) / 2, (vidmode.height() - 300) / 2);
         GLFW.glfwMakeContextCurrent(window);
         GLFW.glfwSwapInterval(1);
         GLFW.glfwShowWindow(window);
