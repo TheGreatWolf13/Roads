@@ -1,6 +1,5 @@
 package tgw.roads;
 
-import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -40,7 +39,6 @@ public final class RoadsMain {
 
     private static void loop(long window) {
         GL.createCapabilities();
-        GL11.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
         int frames = 0;
         String fps = "";
         double lastTime = GLFW.glfwGetTime();
@@ -57,11 +55,7 @@ public final class RoadsMain {
             GLFW.glfwSwapBuffers(window);
             GLFW.glfwPollEvents();
         }
-        Callbacks.glfwFreeCallbacks(window);
-        GLFW.glfwDestroyWindow(window);
         GLFW.glfwTerminate();
-        //noinspection DataFlowIssue
-        GLFW.glfwSetErrorCallback(null).free();
     }
 
     public static void main(String[] args) {
