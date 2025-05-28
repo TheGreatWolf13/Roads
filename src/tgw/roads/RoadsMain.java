@@ -16,9 +16,6 @@ public final class RoadsMain {
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW!");
         }
-        GLFW.glfwDefaultWindowHints();
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
-        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
         long window = GLFW.glfwCreateWindow(640, 480, "Hello World!", MemoryUtil.NULL, MemoryUtil.NULL);
         if (window == MemoryUtil.NULL) {
             throw new IllegalStateException("Failed to create GLFW window!");
@@ -42,6 +39,7 @@ public final class RoadsMain {
         int frames = 0;
         String fps = "";
         double lastTime = GLFW.glfwGetTime();
+        float x = 0;
         while (!GLFW.glfwWindowShouldClose(window)) {
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
             ++frames;
@@ -51,17 +49,24 @@ public final class RoadsMain {
                 fps = frames + " FPS";
                 frames = 0;
             }
+            if (GLFW.glfwGetKey(window, GLFW.GLFW_KEY_D) == GLFW.GLFW_TRUE) {
+                x += 0.001f;
+            }
+            if (GLFW.glfwGetKey(window, GLFW.GLFW_KEY_A) == GLFW.GLFW_TRUE) {
+                x -= 0.001f;
+            }
             GLFW.glfwSetWindowTitle(window, fps);
             GL11.glBegin(GL11.GL_QUADS);
-            GL11.glVertex2f(-0.5f, -0.5f);
             GL11.glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-            GL11.glVertex2f(-0.5f, 0.5f);
+            GL11.glVertex2f(-0.5f + x, -0.5f);
             GL11.glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
-            GL11.glVertex2f(1, 1);
+            GL11.glVertex2f(-0.5f + x, 0.5f);
             GL11.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-            GL11.glVertex2f(1, -1);
+            GL11.glVertex2f(1 + x, 1);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            GL11.glVertex2f(1 + x, -1);
             GL11.glEnd();
+            GLFW.glfwSetFramebufferSizeCallback(window, (w, width, height) -> GL11.glViewport(0, 0, width, height));
             GLFW.glfwSwapBuffers(window);
             GLFW.glfwPollEvents();
         }
