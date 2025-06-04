@@ -6,11 +6,36 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryUtil;
 import tgw.roads.util.Nullable;
 
 public final class Window {
 
+    private static final String VERTEX_SOURCE = """
+            #version 330 core
+            
+            layout (location=0) in vec3 aPos;
+            layout (location=1) in vec4 aColor;
+            
+            out vec4 fColor;
+            
+            void main() {
+                fColor = aColor;
+                gl_Position = vec4(aPos, 1.0);
+            }
+            """;
+    private static final String FRAGMENT_SOURCE = """
+            #version 330 core
+            
+            in vec4 fColor;
+            
+            out vec4 color;
+            
+            void main() {
+                color = fColor;
+            }
+            """;
     private static @Nullable Window window;
     private final long windowPointer;
 
@@ -38,6 +63,34 @@ public final class Window {
         GLFW.glfwSwapInterval(1);
         GLFW.glfwShowWindow(this.windowPointer);
         GL.createCapabilities();
+        int vertexId = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
+        GL20.glShaderSource(vertexId, VERTEX_SOURCE);
+        GL20.glCompileShader(vertexId);
+        if (GL20.glGetShaderi(vertexId, GL20.GL_COMPILE_STATUS) == GL20.GL_FALSE) {
+            int len = GL20.glGetShaderi(vertexId, GL20.GL_INFO_LOG_LENGTH);
+            System.out.println("Compilation of vertex shader failed!");
+            System.out.println(GL20.glGetShaderInfoLog(vertexId, len));
+            throw new RuntimeException("Compilation of vertex shader failed!");
+        }
+        int fragmentId = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER);
+        GL20.glShaderSource(fragmentId, FRAGMENT_SOURCE);
+        GL20.glCompileShader(fragmentId);
+        if (GL20.glGetShaderi(fragmentId, GL20.GL_COMPILE_STATUS) == GL20.GL_FALSE) {
+            int len = GL20.glGetShaderi(fragmentId, GL20.GL_INFO_LOG_LENGTH);
+            System.out.println("Compilation of fragment shader failed!");
+            System.out.println(GL20.glGetShaderInfoLog(fragmentId, len));
+            throw new RuntimeException("Compilation of fragment shader failed!");
+        }
+        int shaderId = GL20.glCreateProgram();
+        GL20.glAttachShader(shaderId, vertexId);
+        GL20.glAttachShader(shaderId, fragmentId);
+        GL20.glLinkProgram(shaderId);
+        if (GL20.glGetProgrami(shaderId, GL20.GL_LINK_STATUS) == GL20.GL_FALSE) {
+            int len = GL20.glGetShaderi(shaderId, GL20.GL_INFO_LOG_LENGTH);
+            System.out.println("Shader linking failed!");
+            System.out.println(GL20.glGetProgramInfoLog(shaderId, len));
+            throw new RuntimeException("Shader linking failed!");
+        }
     }
 
     public static Window get() {
