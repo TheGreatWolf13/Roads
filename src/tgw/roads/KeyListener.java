@@ -9,6 +9,8 @@ import tgw.roads.util.Key;
 import tgw.roads.util.Mod;
 import tgw.roads.util.Nullable;
 
+import java.util.function.Consumer;
+
 public final class KeyListener {
 
     private static @Nullable KeyListener instance;
@@ -24,28 +26,23 @@ public final class KeyListener {
         return instance;
     }
 
+    private static void handleAction(ObjectList<KeyBinding> list, Consumer<KeyBinding> consumer) {
+        for (int i = 0, len = list.size(); i < len; i++) {
+            consumer.accept(list.get(i));
+        }
+    }
+
     public static void keyCallback(long ignoredWindowPointer, @Key int key, int ignoredScancode, @Action int action, @Mod int ignoredMods) {
         KeyListener listener = get();
         ObjectList<KeyBinding> keyBindings = listener.keyBinds.get(key);
         if (keyBindings != null && !keyBindings.isEmpty()) {
             switch (action) {
-                case GLFW.GLFW_PRESS -> {
-                    for (int i = 0, len = keyBindings.size(); i < len; i++) {
-                        KeyBinding binding = keyBindings.get(i);
-                        binding.isDown = true;
-                        ++binding.clickCount;
-                    }
-                }
-                case GLFW.GLFW_RELEASE -> {
-                    for (int i = 0, len = keyBindings.size(); i < len; i++) {
-                        keyBindings.get(i).isDown = false;
-                    }
-                }
-                case GLFW.GLFW_REPEAT -> {
-                    for (int i = 0, len = keyBindings.size(); i < len; i++) {
-                        ++keyBindings.get(i).clickCount;
-                    }
-                }
+                case GLFW.GLFW_PRESS -> handleAction(keyBindings, b -> {
+                    b.isDown = true;
+                    ++b.clickCount;
+                });
+                case GLFW.GLFW_RELEASE -> handleAction(keyBindings, b -> b.isDown = false);
+                case GLFW.GLFW_REPEAT -> handleAction(keyBindings, b -> ++b.clickCount);
             }
         }
     }
