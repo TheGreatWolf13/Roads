@@ -14,5 +14,6 @@
     <orderEntry type="library" name="lwjgl.osgi.glfw" level="project" />
     <orderEntry type="library" name="lwjgl.osgi.opengl" level="project" />
     <orderEntry type="library" name="it.unimi.dsi.fastutil" level="project" />
+    <orderEntry type="library" name="joml" level="project" />
   </component>
 </module>
