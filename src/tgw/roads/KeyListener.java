@@ -55,5 +55,9 @@ public final class KeyListener {
         public KeyBinding(int scancode) {
             this.scancode = scancode;
         }
+
+        public boolean isDown() {
+            return this.isDown;
+        }
     }
 }
