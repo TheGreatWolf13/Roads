@@ -1,6 +1,10 @@
 package tgw.roads;
 
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
+
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -61,5 +65,12 @@ public class Shader {
 
     public void bind() {
         glUseProgram(this.programId);
+    }
+
+    public void uploadMat4f(String varName, Matrix4f mat) {
+        int varLoc = glGetUniformLocation(this.programId, varName);
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+        mat.get(buffer);
+        glUniformMatrix4fv(varLoc, false, buffer);
     }
 }

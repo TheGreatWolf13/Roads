@@ -17,14 +17,17 @@ import static org.lwjgl.opengl.GL33.*;
 public final class Window {
 
     private static @Nullable Window window;
+    private final Camera camera;
     private final int[] elementArray = {
             //CCW order
             2, 1, 0, //Top right
             0, 1, 3, //Bottom left
 
     };
+    private int height = 480;
     private final Shader shader;
     private final int vaoId;
+    private int width = 640;
     private final long windowPointer;
 
     private Window() {
@@ -63,10 +66,10 @@ public final class Window {
         float[] vertexArray = {
                 //pos: 3 float
                 //colour: 4 float
-                0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //Bottom right
-                -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //Top left
-                0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //Top right
-                -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f //Bottom left
+                100, 0, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //Bottom right
+                0, 100, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //Top left
+                100, 100, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //Top right
+                0, 0, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f //Bottom left
         };
         FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertexArray.length);
         vertexBuffer.put(vertexArray).flip();
@@ -82,6 +85,7 @@ public final class Window {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
         glEnableVertexAttribArray(1);
+        this.camera = new Camera(this, 0, 0);
     }
 
     public static Window get() {
@@ -89,6 +93,22 @@ public final class Window {
             window = new Window();
         }
         return window;
+    }
+
+    private static void onSizeChange(long ignoredWindowPointer, int width, int height) {
+        Window window = get();
+        window.width = width;
+        window.height = height;
+        window.camera.adjustProjection();
+        glViewport(0, 0, width, height);
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public int getWidth() {
+        return this.width;
     }
 
     public void loop() {
@@ -99,6 +119,7 @@ public final class Window {
             GLFW.glfwPollEvents();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             ++frames;
+            this.camera.x -= 0.5f;
             double time = GLFW.glfwGetTime();
             if (time - lastTime >= 1) {
                 lastTime = time;
@@ -107,6 +128,8 @@ public final class Window {
             }
             GLFW.glfwSetWindowTitle(this.windowPointer, fps);
             this.shader.bind();
+            this.shader.uploadMat4f("uProj", this.camera.getProjectionMatrix());
+            this.shader.uploadMat4f("uView", this.camera.getViewMatrix());
             glBindVertexArray(this.vaoId);
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
@@ -115,7 +138,7 @@ public final class Window {
             glDisableVertexAttribArray(1);
             glBindVertexArray(0);
             Shader.unbind();
-            GLFW.glfwSetFramebufferSizeCallback(this.windowPointer, (w, width, height) -> glViewport(0, 0, width, height));
+            GLFW.glfwSetFramebufferSizeCallback(this.windowPointer, Window::onSizeChange);
             GLFW.glfwSwapBuffers(this.windowPointer);
         }
         GLFW.glfwTerminate();
