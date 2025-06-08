@@ -7,23 +7,14 @@ import org.lwjgl.glfw.GLFW;
 import tgw.roads.util.Action;
 import tgw.roads.util.Key;
 import tgw.roads.util.Mod;
-import tgw.roads.util.Nullable;
 
 import java.util.function.Consumer;
 
 public final class KeyListener {
 
-    private static @Nullable KeyListener instance;
-    private final Int2ObjectMap<ObjectList<KeyBinding>> keyBinds = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectMap<ObjectList<KeyBinding>> KEY_BINDINGS = new Int2ObjectOpenHashMap<>();
 
     private KeyListener() {
-    }
-
-    public static KeyListener get() {
-        if (instance == null) {
-            instance = new KeyListener();
-        }
-        return instance;
     }
 
     private static void handleAction(ObjectList<KeyBinding> list, Consumer<KeyBinding> consumer) {
@@ -33,8 +24,7 @@ public final class KeyListener {
     }
 
     public static void keyCallback(long ignoredWindowPointer, @Key int key, int ignoredScancode, @Action int action, @Mod int ignoredMods) {
-        KeyListener listener = get();
-        ObjectList<KeyBinding> keyBindings = listener.keyBinds.get(key);
+        ObjectList<KeyBinding> keyBindings = KEY_BINDINGS.get(key);
         if (keyBindings != null && !keyBindings.isEmpty()) {
             switch (action) {
                 case GLFW.GLFW_PRESS -> handleAction(keyBindings, b -> {

@@ -7,88 +7,77 @@ import tgw.roads.util.MouseButton;
 
 public final class MouseListener {
 
-    private static final MouseListener INSTANCE = new MouseListener();
-    private boolean isDragging;
-    private double lastX;
-    private double lastY;
-    private byte mouseButtonPressed;
-    private double scrollX;
-    private double scrollY;
-    private double x;
-    private double y;
+    private static boolean isDragging;
+    private static double lastX;
+    private static double lastY;
+    private static byte mouseButtonPressed;
+    private static double scrollX;
+    private static double scrollY;
+    private static double x;
+    private static double y;
 
     private MouseListener() {
     }
 
     public static void endFrame() {
-        MouseListener listener = get();
-        listener.scrollX = 0;
-        listener.scrollY = 0;
-        listener.lastX = listener.x;
-        listener.lastY = listener.y;
-    }
-
-    public static MouseListener get() {
-        return INSTANCE;
+        scrollX = 0;
+        scrollY = 0;
+        lastX = x;
+        lastY = y;
     }
 
     public static float getDx() {
-        MouseListener listener = get();
-        return (float) (listener.x - listener.lastX);
+        return (float) (x - lastX);
     }
 
     public static float getDy() {
-        MouseListener listener = get();
-        return (float) (listener.y - listener.lastY);
+        return (float) (y - lastY);
     }
 
     public static float getScrollX() {
-        return (float) get().scrollX;
+        return (float) scrollX;
     }
 
     public static float getScrollY() {
-        return (float) get().scrollY;
+        return (float) scrollY;
     }
 
     public static float getX() {
-        return (float) get().x;
+        return (float) x;
     }
 
     public static float getY() {
-        return (float) get().y;
+        return (float) y;
     }
 
     public static boolean isButtonDown(@MouseButton int button) {
-        return (get().mouseButtonPressed & 1 << button) != 0;
+        return (mouseButtonPressed & 1 << button) != 0;
     }
 
     public static boolean isDragging() {
-        return get().isDragging;
+        return isDragging;
     }
 
     public static void mouseButtonCallback(long ignoredWindowPointer, @MouseButton int button, @Action int action, @Mod int ignoredMods) {
-        MouseListener listener = get();
         if (action == GLFW.GLFW_PRESS) {
-            listener.mouseButtonPressed |= (byte) (1 << button);
+            mouseButtonPressed |= (byte) (1 << button);
         }
         else if (action == GLFW.GLFW_RELEASE) {
-            listener.mouseButtonPressed &= (byte) ~(1 << button);
-            listener.isDragging = false;
+            mouseButtonPressed &= (byte) ~(1 << button);
+            isDragging = false;
         }
     }
 
     public static void mousePosCallback(long ignoredWindowPointer, double x, double y) {
-        MouseListener listener = get();
-        listener.lastX = listener.x;
-        listener.lastY = listener.y;
-        listener.x = x;
-        listener.y = y;
-        listener.isDragging = listener.mouseButtonPressed != 0;
+        lastX = MouseListener.x;
+        lastY = MouseListener.y;
+        MouseListener.x = x;
+        MouseListener.y = y;
+        isDragging = mouseButtonPressed != 0;
     }
 
     public static void mouseScrollCallback(long ignoredWindow, double dx, double dy) {
-        MouseListener listener = get();
-        listener.scrollX = dx;
-        listener.scrollY = dy;
+        scrollX = dx;
+        scrollY = dy;
     }
 }
