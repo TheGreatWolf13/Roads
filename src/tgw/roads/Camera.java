@@ -4,11 +4,15 @@ import org.joml.Matrix4f;
 
 public class Camera {
 
+    private static final float ACCELERATION = 8.0f / 9;
+    private static final float DAMPING = 0.9f;
     private final Matrix4f projectionMatrix;
     private final Matrix4f viewMatrix;
+    private float vx;
+    private float vy;
     private final Window window;
-    public float x;
-    public float y;
+    private float x;
+    private float y;
 
     public Camera(Window window, float x, float y) {
         this.window = window;
@@ -21,7 +25,9 @@ public class Camera {
 
     public void adjustProjection() {
         this.projectionMatrix.identity();
-        this.projectionMatrix.ortho(0, this.window.getWidth(), 0, this.window.getHeight(), 0, 100);
+        float width = this.window.getWidth() * 0.5f;
+        float height = this.window.getHeight() * 0.5f;
+        this.projectionMatrix.ortho(-width, width, -height, height, 0, 100);
     }
 
     public Matrix4f getProjectionMatrix() {
@@ -30,7 +36,26 @@ public class Camera {
 
     public Matrix4f getViewMatrix() {
         this.viewMatrix.identity();
-        this.viewMatrix.lookAt(this.x, this.y, 20, this.x, this.y, -1, 0, 1, 0);
+        this.viewMatrix.lookAt(this.x, this.y, 100, this.x, this.y, -1, 0, 1, 0);
         return this.viewMatrix;
+    }
+
+    public void tick() {
+        if (KeyListener.FORWARD.isDown()) {
+            this.vy += ACCELERATION;
+        }
+        if (KeyListener.BACKWARD.isDown()) {
+            this.vy -= ACCELERATION;
+        }
+        this.vy *= DAMPING;
+        this.y += this.vy;
+        if (KeyListener.RIGHT.isDown()) {
+            this.vx += ACCELERATION;
+        }
+        if (KeyListener.LEFT.isDown()) {
+            this.vx -= ACCELERATION;
+        }
+        this.vx *= DAMPING;
+        this.x += this.vx;
     }
 }

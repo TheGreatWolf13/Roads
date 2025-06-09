@@ -66,10 +66,10 @@ public final class Window {
         float[] vertexArray = {
                 //pos: 3 float
                 //colour: 4 float
-                100, 0, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //Bottom right
-                0, 100, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //Top left
-                100, 100, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //Top right
-                0, 0, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f //Bottom left
+                50, -50, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //Bottom right
+                -50, 50, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //Top left
+                50, 50, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //Top right
+                -50, -50, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f //Bottom left
         };
         FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertexArray.length);
         vertexBuffer.put(vertexArray).flip();
@@ -117,9 +117,9 @@ public final class Window {
         double lastTime = GLFW.glfwGetTime();
         while (!GLFW.glfwWindowShouldClose(this.windowPointer)) {
             GLFW.glfwPollEvents();
+            this.camera.tick();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             ++frames;
-            this.camera.x -= 0.5f;
             double time = GLFW.glfwGetTime();
             if (time - lastTime >= 1) {
                 lastTime = time;
