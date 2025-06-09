@@ -140,6 +140,7 @@ public final class Window {
             Shader.unbind();
             GLFW.glfwSetFramebufferSizeCallback(this.windowPointer, Window::onSizeChange);
             GLFW.glfwSwapBuffers(this.windowPointer);
+            MouseListener.endFrame();
         }
         GLFW.glfwTerminate();
     }

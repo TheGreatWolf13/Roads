@@ -14,6 +14,7 @@ public class Camera {
     private final Window window;
     private float x;
     private float y;
+    private float zoom = 1.0f;
 
     public Camera(Window window, float x, float y) {
         this.window = window;
@@ -26,8 +27,8 @@ public class Camera {
 
     public void adjustProjection() {
         this.projectionMatrix.identity();
-        float width = this.window.getWidth() * 0.5f;
-        float height = this.window.getHeight() * 0.5f;
+        float width = this.window.getWidth() * 0.5f * this.zoom;
+        float height = this.window.getHeight() * 0.5f * this.zoom;
         this.projectionMatrix.ortho(-width, width, -height, height, 0, 100);
     }
 
@@ -64,5 +65,22 @@ public class Camera {
         }
         this.vx *= DAMPING;
         this.x += this.vx;
+        float lastZoom = this.zoom;
+        float scrollY = MouseListener.getScrollY();
+        if (scrollY > 0) {
+            this.zoom /= 2;
+            if (this.zoom < 1 / 16.0f) {
+                this.zoom = 1 / 16.0f;
+            }
+        }
+        else if (scrollY < 0) {
+            this.zoom *= 2;
+            if (this.zoom > 16) {
+                this.zoom = 16;
+            }
+        }
+        if (lastZoom != this.zoom) {
+            this.adjustProjection();
+        }
     }
 }
