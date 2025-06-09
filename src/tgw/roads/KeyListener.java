@@ -19,6 +19,8 @@ public final class KeyListener {
     public static final KeyBinding BACKWARD = registerByKey(GLFW.GLFW_KEY_S);
     public static final KeyBinding LEFT = registerByKey(GLFW.GLFW_KEY_A);
     public static final KeyBinding RIGHT = registerByKey(GLFW.GLFW_KEY_D);
+    public static final KeyBinding ROTATE_LEFT = registerByKey(GLFW.GLFW_KEY_Q);
+    public static final KeyBinding ROTATE_RIGHT = registerByKey(GLFW.GLFW_KEY_E);
 
     private KeyListener() {
     }

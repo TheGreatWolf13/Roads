@@ -7,6 +7,7 @@ public class Camera {
     private static final float ACCELERATION = 8.0f / 9;
     private static final float DAMPING = 0.9f;
     private final Matrix4f projectionMatrix;
+    private float roll = (float) (Math.PI / 2.0);
     private final Matrix4f viewMatrix;
     private float vx;
     private float vy;
@@ -36,11 +37,17 @@ public class Camera {
 
     public Matrix4f getViewMatrix() {
         this.viewMatrix.identity();
-        this.viewMatrix.lookAt(this.x, this.y, 100, this.x, this.y, -1, 0, 1, 0);
+        this.viewMatrix.lookAt(this.x, this.y, 100, this.x, this.y, -1, (float) Math.cos(this.roll), (float) Math.sin(this.roll), 0);
         return this.viewMatrix;
     }
 
     public void tick() {
+        if (KeyListener.ROTATE_LEFT.isDown()) {
+            this.roll += (float) (Math.PI / 180.0);
+        }
+        if (KeyListener.ROTATE_RIGHT.isDown()) {
+            this.roll -= (float) (Math.PI / 180.0);
+        }
         if (KeyListener.FORWARD.isDown()) {
             this.vy += ACCELERATION;
         }
