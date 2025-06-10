@@ -13,6 +13,7 @@ import static org.lwjgl.opengl.GL20.*;
 
 public class Shader {
 
+    private static int currentProgramId;
     private final int programId;
 
     public Shader(String name) {
@@ -60,11 +61,17 @@ public class Shader {
     }
 
     public static void unbind() {
-        glUseProgram(0);
+        if (currentProgramId != 0) {
+            glUseProgram(0);
+            currentProgramId = 0;
+        }
     }
 
     public void bind() {
-        glUseProgram(this.programId);
+        if (currentProgramId != this.programId) {
+            glUseProgram(this.programId);
+            currentProgramId = this.programId;
+        }
     }
 
     public void uploadMat4f(String varName, Matrix4f mat) {
