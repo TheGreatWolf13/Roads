@@ -1,6 +1,5 @@
 package tgw.roads;
 
-import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.Version;
@@ -151,14 +150,8 @@ public final class Window {
             }
             if (MouseListener.isButtonDown(GLFW.GLFW_MOUSE_BUTTON_LEFT) && cooldown == 0) {
                 Vector4f vec = new Vector4f((2 * MouseListener.getX() - this.width) / this.width, (this.height - 2 * MouseListener.getY()) / this.height, -1, 1);
-                Matrix4f viewMatrix = this.camera.getViewMatrix();
-                Matrix4f projViewMatrix = new Matrix4f().set(this.camera.getProjectionMatrix()).mul(viewMatrix).invert();
-                projViewMatrix.transform(vec);
-                vec.mul(1 / vec.w);
-                viewMatrix.invert().transform(vec);
-                System.out.println("Created new node at [" + vec.x + ", " + vec.y + "]");
+                vec.mul(this.camera.getInverseProjMatrix()).mul(this.camera.getInverseViewMatrix());
                 Node.createNew(vec.x, vec.y);
-                cooldown = 60;
             }
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             ++frames;
@@ -170,7 +163,7 @@ public final class Window {
             }
             GLFW.glfwSetWindowTitle(this.windowPointer, fps);
             this.shader.bind();
-            this.shader.uploadMat4f("uProj", this.camera.getProjectionMatrix());
+            this.shader.uploadMat4f("uProj", this.camera.getProjMatrix());
             this.shader.uploadMat4f("uView", this.camera.getViewMatrix());
             this.shader.uploadVec3f("scale", 1, 1, 1);
             this.shader.uploadVec3f("offset", 0, 0, 0);

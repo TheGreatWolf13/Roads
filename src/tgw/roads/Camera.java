@@ -6,7 +6,9 @@ public class Camera {
 
     private static final float ACCELERATION = 8.0f / 9;
     private static final float DAMPING = 0.9f;
-    private final Matrix4f projectionMatrix;
+    private final Matrix4f inverseProjMatrix;
+    private final Matrix4f inverseViewMatrix;
+    private final Matrix4f projMatrix;
     private float roll = (float) (Math.PI / 2.0);
     private final Matrix4f viewMatrix;
     private float vx;
@@ -20,20 +22,31 @@ public class Camera {
         this.window = window;
         this.x = x;
         this.y = y;
-        this.projectionMatrix = new Matrix4f();
+        this.projMatrix = new Matrix4f();
+        this.inverseProjMatrix = new Matrix4f();
         this.viewMatrix = new Matrix4f();
+        this.inverseViewMatrix = new Matrix4f();
         this.adjustProjection();
     }
 
     public void adjustProjection() {
-        this.projectionMatrix.identity();
+        this.projMatrix.identity();
         float width = this.window.getWidth() * 0.5f * this.zoom;
         float height = this.window.getHeight() * 0.5f * this.zoom;
-        this.projectionMatrix.ortho(-width, width, -height, height, 0, 100);
+        this.projMatrix.ortho(-width, width, -height, height, 0, 100);
+        this.projMatrix.invert(this.inverseProjMatrix);
     }
 
-    public Matrix4f getProjectionMatrix() {
-        return this.projectionMatrix;
+    public Matrix4f getInverseProjMatrix() {
+        return this.inverseProjMatrix;
+    }
+
+    public Matrix4f getInverseViewMatrix() {
+        return this.getViewMatrix().invert(this.inverseViewMatrix);
+    }
+
+    public Matrix4f getProjMatrix() {
+        return this.projMatrix;
     }
 
     public Matrix4f getViewMatrix() {
