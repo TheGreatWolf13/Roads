@@ -16,14 +16,44 @@ import static org.lwjgl.opengl.GL33.*;
 
 public final class Window {
 
-    private static @Nullable Window window;
-    private final Camera camera;
-    private final int[] elementArray = {
+    public static final float[] CIRCLE_VERTEX_ARRAY;
+    public static final int[] CIRCLE_ELEMENT_ARRAY;
+    private static final int CIRCLE_QUALITY = 64;
+    public static final int[] SQUARE_ELEMENT_ARRAY = {
             //CCW order
             2, 1, 0, //Top right
             0, 1, 3, //Bottom left
 
     };
+    private static @Nullable Window window;
+
+    static {
+        float[] vertex = new float[(CIRCLE_QUALITY + 1) * 3];
+        int[] elements = new int[CIRCLE_QUALITY + 2];
+//        vertex[3] = 1.0f;
+//        vertex[4] = 1.0f;
+//        vertex[5] = 1.0f;
+//        vertex[6] = 1.0f;
+//        int index = 7;
+        int index = 3;
+        for (float i = 0; i < 360; i += 360.0f / CIRCLE_QUALITY) {
+            vertex[index++] = (float) Math.cos(Math.PI / 180 * i);
+            vertex[index++] = (float) Math.sin(Math.PI / 180 * i);
+            ++index;
+//            vertex[index++] = 1.0f;
+//            vertex[index++] = 1.0f;
+//            vertex[index++] = 1.0f;
+//            vertex[index++] = 1.0f;
+        }
+        for (int i = 0; i < CIRCLE_QUALITY + 2 - 1; i++) {
+            elements[i] = i;
+        }
+        elements[CIRCLE_QUALITY + 2 - 1] = 1;
+        CIRCLE_VERTEX_ARRAY = vertex;
+        CIRCLE_ELEMENT_ARRAY = elements;
+    }
+
+    private final Camera camera;
     private int height = 480;
     private final Shader shader;
     private final int vaoId;
@@ -39,6 +69,7 @@ public final class Window {
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 4);
         this.windowPointer = GLFW.glfwCreateWindow(640, 480, "", MemoryUtil.NULL, MemoryUtil.NULL);
         if (this.windowPointer == MemoryUtil.NULL) {
             throw new IllegalStateException("Failed to create GLFW window!");
@@ -57,12 +88,6 @@ public final class Window {
         this.shader = new Shader("default");
         this.vaoId = glGenVertexArrays();
         glBindVertexArray(this.vaoId);
-        //pos: 3 float
-        //colour: 4 float
-        //Bottom right
-        //Top left
-        //Top right
-        //Bottom left
         float[] vertexArray = {
                 //pos: 3 float
                 //colour: 4 float
@@ -71,20 +96,20 @@ public final class Window {
                 50, 50, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //Top right
                 -50, -50, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f //Bottom left
         };
-        FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertexArray.length);
-        vertexBuffer.put(vertexArray).flip();
+        FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(CIRCLE_VERTEX_ARRAY.length);
+        vertexBuffer.put(CIRCLE_VERTEX_ARRAY).flip();
         int vboId = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vboId);
         glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW);
-        IntBuffer elementBuffer = BufferUtils.createIntBuffer(this.elementArray.length);
-        elementBuffer.put(this.elementArray).flip();
+        IntBuffer elementBuffer = BufferUtils.createIntBuffer(CIRCLE_ELEMENT_ARRAY.length);
+        elementBuffer.put(CIRCLE_ELEMENT_ARRAY).flip();
         int eboId = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboId);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementBuffer, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 7 * Float.BYTES, 0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
-        glEnableVertexAttribArray(1);
+//        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
+//        glEnableVertexAttribArray(1);
         this.camera = new Camera(this, 0, 0);
     }
 
@@ -130,12 +155,14 @@ public final class Window {
             this.shader.bind();
             this.shader.uploadMat4f("uProj", this.camera.getProjectionMatrix());
             this.shader.uploadMat4f("uView", this.camera.getViewMatrix());
+            this.shader.uploadVec3f("scale", 50, 50, 50);
+            this.shader.setShaderColour(1, 0, 0, 1);
             glBindVertexArray(this.vaoId);
             glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glDrawElements(GL_TRIANGLES, this.elementArray.length, GL_UNSIGNED_INT, 0);
+//            glEnableVertexAttribArray(1);
+            glDrawElements(GL_TRIANGLE_FAN, CIRCLE_ELEMENT_ARRAY.length, GL_UNSIGNED_INT, 0);
             glDisableVertexAttribArray(0);
-            glDisableVertexAttribArray(1);
+//            glDisableVertexAttribArray(1);
             glBindVertexArray(0);
             Shader.unbind();
             GLFW.glfwSetFramebufferSizeCallback(this.windowPointer, Window::onSizeChange);

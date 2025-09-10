@@ -74,10 +74,20 @@ public class Shader {
         }
     }
 
+    public void setShaderColour(float r, float g, float b, float a) {
+        int varLoc = glGetUniformLocation(this.programId, "colour");
+        glUniform4f(varLoc, r, g, b, a);
+    }
+
     public void uploadMat4f(String varName, Matrix4f mat) {
         int varLoc = glGetUniformLocation(this.programId, varName);
         FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
         mat.get(buffer);
         glUniformMatrix4fv(varLoc, false, buffer);
+    }
+
+    public void uploadVec3f(String varName, float x, float y, float z) {
+        int varLoc = glGetUniformLocation(this.programId, varName);
+        glUniform3f(varLoc, x, y, z);
     }
 }
