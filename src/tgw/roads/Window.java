@@ -20,31 +20,16 @@ public final class Window {
     public static final float[] CIRCLE_VERTEX_ARRAY;
     public static final int[] CIRCLE_ELEMENT_ARRAY;
     private static final int CIRCLE_QUALITY = 64;
-    public static final int[] SQUARE_ELEMENT_ARRAY = {
-            //CCW order
-            2, 1, 0, //Top right
-            0, 1, 3, //Bottom left
-
-    };
     private static @Nullable Window window;
 
     static {
         float[] vertex = new float[(CIRCLE_QUALITY + 1) * 3];
         int[] elements = new int[CIRCLE_QUALITY + 2];
-//        vertex[3] = 1.0f;
-//        vertex[4] = 1.0f;
-//        vertex[5] = 1.0f;
-//        vertex[6] = 1.0f;
-//        int index = 7;
         int index = 3;
         for (float i = 0; i < 360; i += 360.0f / CIRCLE_QUALITY) {
             vertex[index++] = (float) Math.cos(Math.PI / 180 * i);
             vertex[index++] = (float) Math.sin(Math.PI / 180 * i);
             ++index;
-//            vertex[index++] = 1.0f;
-//            vertex[index++] = 1.0f;
-//            vertex[index++] = 1.0f;
-//            vertex[index++] = 1.0f;
         }
         for (int i = 0; i < CIRCLE_QUALITY + 2 - 1; i++) {
             elements[i] = i;
@@ -89,14 +74,6 @@ public final class Window {
         this.shader = new Shader("default");
         this.vaoId = glGenVertexArrays();
         glBindVertexArray(this.vaoId);
-        float[] vertexArray = {
-                //pos: 3 float
-                //colour: 4 float
-                50, -50, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //Bottom right
-                -50, 50, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, //Top left
-                50, 50, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, //Top right
-                -50, -50, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f //Bottom left
-        };
         FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(CIRCLE_VERTEX_ARRAY.length);
         vertexBuffer.put(CIRCLE_VERTEX_ARRAY).flip();
         int vboId = glGenBuffers();
@@ -109,8 +86,6 @@ public final class Window {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementBuffer, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
-//        glVertexAttribPointer(1, 4, GL_FLOAT, false, 7 * Float.BYTES, 3 * Float.BYTES);
-//        glEnableVertexAttribArray(1);
         this.camera = new Camera(this, 0, 0);
     }
 
