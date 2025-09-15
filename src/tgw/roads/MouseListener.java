@@ -1,5 +1,6 @@
 package tgw.roads;
 
+import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 import tgw.roads.util.Action;
 import tgw.roads.util.Mod;
@@ -7,6 +8,7 @@ import tgw.roads.util.MouseButton;
 
 public final class MouseListener {
 
+    private static final Vector4f VEC = new Vector4f();
     private static short clickCount0;
     private static short clickCount1;
     private static short clickCount2;
@@ -110,6 +112,10 @@ public final class MouseListener {
 
     public static float getScrollY() {
         return (float) scrollY;
+    }
+
+    public static Vector4f getVec(Window window) {
+        return VEC.set((2 * getX() - window.getWidth()) / window.getWidth(), (window.getHeight() - 2 * getY()) / window.getHeight(), -1, 1);
     }
 
     public static float getX() {

@@ -141,15 +141,11 @@ public final class Window {
         int frames = 0;
         String fps = "";
         double lastTime = GLFW.glfwGetTime();
-        int cooldown = 0;
         while (!GLFW.glfwWindowShouldClose(this.windowPointer)) {
             GLFW.glfwPollEvents();
             this.camera.tick();
-            if (cooldown > 0) {
-                --cooldown;
-            }
-            if (MouseListener.isButtonDown(GLFW.GLFW_MOUSE_BUTTON_LEFT) && cooldown == 0) {
-                Vector4f vec = new Vector4f((2 * MouseListener.getX() - this.width) / this.width, (this.height - 2 * MouseListener.getY()) / this.height, -1, 1);
+            if (MouseListener.consumeClick(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
+                Vector4f vec = MouseListener.getVec(this);
                 vec.mul(this.camera.getInverseProjMatrix()).mul(this.camera.getInverseViewMatrix());
                 Node.createNew(vec.x, vec.y);
             }
