@@ -20,6 +20,7 @@ public final class Window {
     public static final float[] CIRCLE_VERTEX_ARRAY;
     public static final int[] CIRCLE_ELEMENT_ARRAY;
     private static final int CIRCLE_QUALITY = 64;
+    private static double lastFrameTime;
     private static @Nullable Window window;
 
     static {
@@ -52,6 +53,7 @@ public final class Window {
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW!");
         }
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
@@ -68,7 +70,7 @@ public final class Window {
         assert vidmode != null;
         GLFW.glfwSetWindowPos(this.windowPointer, (vidmode.width() - 640) / 2, (vidmode.height() - 480) / 2);
         GLFW.glfwMakeContextCurrent(this.windowPointer);
-        GLFW.glfwSwapInterval(1);
+        GLFW.glfwSwapInterval(0);
         GLFW.glfwShowWindow(this.windowPointer);
         GL.createCapabilities();
         this.shader = new Shader("default");
@@ -86,6 +88,7 @@ public final class Window {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementBuffer, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
         glEnableVertexAttribArray(0);
+        GLFW.glfwSetFramebufferSizeCallback(this.windowPointer, Window::onSizeChange);
         this.camera = new Camera(this, 0, 0);
     }
 
@@ -94,6 +97,22 @@ public final class Window {
             window = new Window();
         }
         return window;
+    }
+
+    private static void limitDisplayFPS(int fps) {
+        double nextFrameTime = lastFrameTime + 1.0 / (fps + 1);
+        double now = GLFW.glfwGetTime();
+        while (now < nextFrameTime) {
+            //We use 800 instead of 1000 to compensate for the OS overhead
+            long ms = (long) ((nextFrameTime - now) * 800);
+            try {
+                Thread.sleep(ms);
+            }
+            catch (InterruptedException ignored) {
+            }
+            now = GLFW.glfwGetTime();
+        }
+        lastFrameTime = now;
     }
 
     private static void onSizeChange(long ignoredWindowPointer, int width, int height) {
@@ -115,9 +134,8 @@ public final class Window {
     public void loop() {
         int frames = 0;
         String fps = "";
-        double lastTime = GLFW.glfwGetTime();
+        long lastTime = System.nanoTime() / 1_000_000L;
         while (!GLFW.glfwWindowShouldClose(this.windowPointer)) {
-            GLFW.glfwPollEvents();
             this.camera.tick();
             if (MouseListener.consumeClick(GLFW.GLFW_MOUSE_BUTTON_LEFT)) {
                 Vector4f vec = MouseListener.getVec(this);
@@ -125,13 +143,6 @@ public final class Window {
                 Node.createNew(vec.x, vec.y);
             }
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            ++frames;
-            double time = GLFW.glfwGetTime();
-            if (time - lastTime >= 1) {
-                lastTime = time;
-                fps = frames + " FPS";
-                frames = 0;
-            }
             GLFW.glfwSetWindowTitle(this.windowPointer, fps);
             this.shader.bind();
             this.shader.uploadMat4f("uProj", this.camera.getProjMatrix());
@@ -153,10 +164,23 @@ public final class Window {
             glDisableVertexAttribArray(0);
             glBindVertexArray(0);
             Shader.unbind();
-            GLFW.glfwSetFramebufferSizeCallback(this.windowPointer, Window::onSizeChange);
-            GLFW.glfwSwapBuffers(this.windowPointer);
-            MouseListener.endFrame();
+            this.updateDisplay();
+            limitDisplayFPS(120);
+            ++frames;
+            long time = System.nanoTime() / 1_000_000L;
+            while (time >= lastTime + 1_000L) {
+                lastTime += 1_000;
+                fps = frames + " FPS";
+                frames = 0;
+            }
         }
         GLFW.glfwTerminate();
+    }
+
+    private void updateDisplay() {
+        GLFW.glfwPollEvents();
+        GLFW.glfwSwapBuffers(this.windowPointer);
+        GLFW.glfwPollEvents();
+        MouseListener.endFrame();
     }
 }
